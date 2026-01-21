@@ -1,4 +1,4 @@
-# eduschedule-backend/main.py
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from api.routes import users, teachers, rooms, subjects, classes, auth, timetables, payments, assignments, public_v1, public, schools
@@ -9,12 +9,10 @@ app = FastAPI(
     version="0.1.0",
 )
 
-# Define the list of origins that are allowed to make requests
-origins = [
-    "http://localhost:5173",
-]
+# Use env var for origins, default to localhost for dev
+origins_str = os.environ.get("CORS_ORIGINS", "http://localhost:5173,http://localhost:3000")
+origins = origins_str.split(",")
 
-# Add the CORS middleware to the application
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -33,11 +31,10 @@ app.include_router(timetables.router)
 app.include_router(users.router)
 app.include_router(public_v1.router)
 app.include_router(assignments.router)
-app.include_router(public.router) # Add the new public router
+app.include_router(public.router)
 app.include_router(payments.router)
 app.include_router(schools.router)
 
 @app.get("/")
 def read_root():
-    """A simple endpoint to confirm the API is running."""
     return {"message": "Welcome to the EduSchedule API!"}

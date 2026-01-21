@@ -1,64 +1,76 @@
-# api/routes/payments.py
 import os
 import uuid
-from fastapi import APIRouter, Depends, HTTPException, Request, Body
+import hashlib
+import hmac
+from fastapi import APIRouter, Depends, HTTPException, Request, Body, Header
 from pydantic import BaseModel
 from paystackapi.paystack import Paystack
 from core.dependencies import get_current_user, supabase
 
 # Initialize Paystack
-paystack = Paystack(secret_key=os.environ.get("PAYSTACK_SECRET_KEY"))
+PAYSTACK_SECRET = os.environ.get("PAYSTACK_SECRET_KEY")
+paystack = Paystack(secret_key=PAYSTACK_SECRET)
+FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:5173")
 
 router = APIRouter(prefix="/api/payments", tags=["Payments"])
 
-# Define a Pydantic model for the request body
 class SubscriptionRequest(BaseModel):
     planId: str
-    amount: int # Amount in kobo
+    amount: int
 
 @router.post("/subscribe")
 def create_payment_link(
-    sub_request: SubscriptionRequest = Body(...), 
+    sub_request: SubscriptionRequest = Body(...),
     current_user: dict = Depends(get_current_user)
 ):
-    """
-    Initializes a Paystack transaction and provides a callback URL.
-    """
-    email = current_user['email']
-    user_id = current_user['uid']
-    
-    # Use the amount from the request body
-    amount = sub_request.amount
+    email = current_user.email
+    user_id = current_user.id
 
     response = paystack.transaction.initialize(
-        reference=f"edu_{user_id}_{uuid.uuid4()}", # Unique reference
-        amount=amount,
+        reference=f"edu_{user_id}_{uuid.uuid4()}",
+        amount=sub_request.amount,
         email=email,
-        # Tell Paystack where to redirect the user after payment
-        callback_url="http://localhost:5173/payment-success", 
-        # Pass our user ID and the plan ID in the metadata
-        metadata={"user_id": user_id, "plan_id": sub_request.planId} 
+        callback_url=f"{FRONTEND_URL}/payment-success",
+        metadata={"user_id": user_id, "plan_id": sub_request.planId}
     )
-    
+
     if response.get('status'):
         return {"authorization_url": response['data']['authorization_url']}
     else:
         raise HTTPException(status_code=400, detail="Could not initialize payment.")
 
 @router.post("/webhook")
-async def paystack_webhook(request: Request):
+async def paystack_webhook(request: Request, x_paystack_signature: str = Header(None)):
     """
-    Listens for successful payment events from Paystack.
-    This endpoint must be publicly accessible (no auth dependency).
+    Secure Webhook endpoint.
     """
+    body_bytes = await request.body()
+
+    # 1. Verify Signature
+    if not PAYSTACK_SECRET:
+        print("Error: PAYSTACK_SECRET_KEY not set")
+        return {"status": "error"}
+
+    hash_obj = hmac.new(PAYSTACK_SECRET.encode('utf-8'), body_bytes, hashlib.sha512)
+    expected_signature = hash_obj.hexdigest()
+
+    if x_paystack_signature != expected_signature:
+        raise HTTPException(status_code=403, detail="Invalid signature")
+
+    # 2. Process Event
     body = await request.json()
     event = body.get('event')
 
     if event == 'charge.success':
-        user_id = body['data']['metadata']['user_id']
-        # Update user's plan in the database to 'premium'
-        # Set subscription_expires_at to 1 month or 1 year from now
-        # ... supabase.table('users').update({...}).eq('id', user_id).execute() ...
-        print(f"Payment successful for user {user_id}. Granting premium access.")
-    
+        metadata = body['data'].get('metadata', {})
+        user_id = metadata.get('user_id')
+
+        if user_id:
+            # Update user's profile to premium
+            # In a real app, calculate actual expiry date based on plan
+            supabase.table('profiles').update({
+                "plan": "premium",
+                "subscription_status": "active"
+            }).eq('id', user_id).execute()
+
     return {"status": "ok"}
