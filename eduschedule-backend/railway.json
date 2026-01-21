@@ -1,0 +1,33 @@
+{
+  "build": {
+    "builder": "DOCKERFILE",
+    "dockerfilePath": "Dockerfile"
+  },
+  "deploy": {
+    "startCommand": "uvicorn main:app --host 0.0.0.0 --port $PORT --workers 4",
+    "healthcheckPath": "/",
+    "healthcheckTimeout": 100,
+    "restartPolicyType": "ON_FAILURE",
+    "restartPolicyMaxRetries": 10
+  },
+  "environments": {
+    "production": {
+      "variables": {
+        "PYTHON_ENV": "production",
+        "CORS_ORIGINS": "${{FRONTEND_URL}}",
+        "FRONTEND_URL": "${{FRONTEND_URL}}"
+      }
+    }
+  },
+  "regions": [
+    "us-west1"
+  ],
+  "plugins": [
+    {
+      "id": "postgresql"
+    },
+    {
+      "id": "redis"
+    }
+  ]
+}
