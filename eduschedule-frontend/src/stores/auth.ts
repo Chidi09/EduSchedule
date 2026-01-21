@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import { supabase } from '../supabase';
-import type { Session, User } from '@supabase/supabase-js';
+import type { Session, User, SignUpWithPasswordCredentials } from '@supabase/supabase-js';
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
@@ -8,6 +8,7 @@ export const useAuthStore = defineStore('auth', {
     user: null as User | null,
     profile: null as any | null,
     loading: true,
+    isAuthReady: false,
   }),
   
   actions: {
@@ -24,13 +25,19 @@ export const useAuthStore = defineStore('auth', {
         console.error("Auth init error:", error);
       } finally {
         this.loading = false;
+        this.isAuthReady = true;
       }
 
       // Listen for auth changes
-      supabase.auth.onAuthStateChange((_event, session) => {
+      supabase.auth.onAuthStateChange(async (_event, session) => {
         this.session = session;
         this.user = session?.user || null;
-        if (this.user) this.fetchProfile();
+        if (this.user) {
+          await this.fetchProfile();
+        } else {
+          this.profile = null;
+        }
+        this.isAuthReady = true;
       });
     },
 
@@ -48,11 +55,24 @@ export const useAuthStore = defineStore('auth', {
       }
     },
 
+    async signUp(credentials: SignUpWithPasswordCredentials) {
+      return await supabase.auth.signUp(credentials);
+    },
+
+    async signIn(credentials: SignUpWithPasswordCredentials) {
+      return await supabase.auth.signInWithPassword(credentials);
+    },
+
     async signOut() {
       await supabase.auth.signOut();
       this.session = null;
       this.user = null;
       this.profile = null;
+    },
+
+    // Legacy method name for compatibility
+    async logout() {
+      return await this.signOut();
     }
   }
 });
