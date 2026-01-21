@@ -3,6 +3,7 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import { VitePWA } from 'vite-plugin-pwa'
 
+// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
     vue(),
@@ -15,7 +16,7 @@ export default defineConfig({
         description: 'Intelligent School Timetabling & Management System',
         theme_color: '#005F73',
         background_color: '#F8F9FA',
-        display: 'standalone', // This hides the browser URL bar
+        display: 'standalone',
         orientation: 'portrait',
         scope: '/',
         start_url: '/',
@@ -68,7 +69,13 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
         runtimeCaching: [
           {
-            urlPattern: /^https:\/\/api\./,
+            urlPattern: ({ url }: any) => {
+              // Cache API requests from our backend and Supabase
+              return (
+                url.hostname.includes('supabase.co') ||
+                url.hostname.includes('api.eduschedule.name.ng')
+              )
+            },
             handler: 'NetworkFirst',
             options: {
               cacheName: 'api-cache',
@@ -76,9 +83,7 @@ export default defineConfig({
                 maxEntries: 50,
                 maxAgeSeconds: 60 * 60 * 24, // 24 hours
               },
-              cacheKeyWillBeUsed: async ({ request }) => {
-                return `${request.url}?timestamp=${Date.now()}`
-              },
+              networkTimeoutSeconds: 10,
             },
           },
           {
