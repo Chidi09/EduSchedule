@@ -1,22 +1,33 @@
-// tailwind.config.js
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: [
-    "./index.html",
-    "./src/**/*.{vue,js,ts,jsx,tsx}",
-  ],
+  content: ['./index.html', './src/**/*.{vue,js,ts,jsx,tsx}'],
   theme: {
     extend: {
-      colors: {
-        'brand-primary': '#005F73',   // Deep Teal
-        'brand-secondary': '#0A9396', // Lighter Teal
-        'brand-accent': '#EE9B00',    // Gold Accent
-        'brand-dark': '#232323',      // Almost Black
-        'brand-light': '#F8F9FA',     // Off-White
-        'brand-gray': '#6C757D',      // Muted Gray
-      },
       fontFamily: {
-        sans: ['Poppins', 'sans-serif'],
+        sans: ['Inter', 'sans-serif'],
+        heading: ['Poppins', 'sans-serif'],
+      },
+      colors: {
+        brand: {
+          primary: '#0F172A', // Deep Slate (Professional)
+          accent: '#3B82F6', // Bright Blue (Action)
+          secondary: '#64748B', // Muted Slate
+          bg: '#F8FAFC',
+        },
+      },
+      animation: {
+        'fade-in-up': 'fadeInUp 0.8s ease-out',
+        float: 'float 6s ease-in-out infinite',
+      },
+      keyframes: {
+        fadeInUp: {
+          '0%': { opacity: '0', transform: 'translateY(20px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        float: {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-20px)' },
+        },
       },
     },
   },
