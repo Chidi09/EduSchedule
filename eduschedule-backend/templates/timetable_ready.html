@@ -1,0 +1,131 @@
+{% extends "base.html" %} {% block content %}
+<h1 style="color: #0a9396">Timetable Generated Successfully! ✅</h1>
+
+<div class="alert alert-success">
+    <strong>🎉 Great news!</strong> The timetable for
+    <strong>{{ term_name }}</strong> has been generated successfully and is
+    ready for review.
+</div>
+
+<p>
+    Our AI-powered scheduling engine has created an optimized timetable that
+    resolves all conflicts while respecting teacher preferences and resource
+    constraints.
+</p>
+
+<div class="stats">
+    <div class="stat-item">
+        <span class="stat-number">{{ total_classes }}</span>
+        <span class="stat-label">Classes Scheduled</span>
+    </div>
+    <div class="stat-item">
+        <span class="stat-number">{{ teacher_count }}</span>
+        <span class="stat-label">Teachers Assigned</span>
+    </div>
+    <div class="stat-item">
+        <span class="stat-number">100%</span>
+        <span class="stat-label">Conflicts Resolved</span>
+    </div>
+</div>
+
+<h3>Generation Summary</h3>
+<ul>
+    <li>
+        <strong>Generation Time:</strong> {{ generation_time or "Less than 15
+        minutes" }}
+    </li>
+    <li>
+        <strong>Solutions Found:</strong> {{ solutions_count or "Multiple" }}
+        optimized candidates
+    </li>
+    <li><strong>Quality Score:</strong> {{ quality_score or "Excellent" }}</li>
+    <li>
+        <strong>Room Utilization:</strong> {{ room_utilization or "Optimal" }}
+    </li>
+    <li>
+        <strong>Teacher Preferences Met:</strong> {{ preferences_met or "95%" }}
+    </li>
+</ul>
+
+<div class="alert alert-info">
+    <strong>💡 Pro Tip:</strong> We've generated multiple timetable candidates
+    ranked by quality. You can review all options and select the one that best
+    fits your school's needs.
+</div>
+
+<h3>What's Next?</h3>
+<p>Your timetable is now ready for review and approval. You can:</p>
+<ul>
+    <li>Review all generated candidates and their quality metrics</li>
+    <li>Compare different scheduling options side-by-side</li>
+    <li>Make manual adjustments if needed</li>
+    <li>Publish the final timetable to teachers and students</li>
+    <li>Export to your preferred format (PDF, Excel, CSV)</li>
+</ul>
+
+<div style="text-align: center; margin: 30px 0">
+    <a href="{{ timetable_url }}" class="button">Review & Approve Timetable</a>
+</div>
+
+{% if recommendations and recommendations|length > 0 %}
+<h3>Optimization Recommendations</h3>
+<div class="alert alert-warning">
+    <strong>📊 Analysis:</strong> Our system has identified some opportunities
+    for further optimization:
+</div>
+<ul>
+    {% for recommendation in recommendations %}
+    <li>{{ recommendation }}</li>
+    {% endfor %}
+</ul>
+{% endif %}
+
+<h3>Publishing Options</h3>
+<p>
+    Once you approve the timetable, you can instantly publish it to all teachers
+    via eduschedule.name.ng:
+</p>
+<div style="text-align: center; margin: 20px 0">
+    <a
+        href="{{ publish_url or (timetable_url + '/publish') }}"
+        class="button button-secondary"
+        >Publish to Teachers</a
+    >
+</div>
+
+<div
+    style="
+        margin-top: 30px;
+        padding: 20px;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+    "
+>
+    <h4 style="margin-top: 0; color: #005f73">Need to Make Changes?</h4>
+    <p style="margin-bottom: 0; font-size: 14px">
+        No problem! You can always generate a new timetable if your requirements
+        change. Teachers and room assignments can be updated at any time.
+    </p>
+</div>
+
+<p>
+    Thank you for using EduSchedule at <strong>eduschedule.name.ng</strong>!
+    We're committed to making your scheduling process as smooth as possible.
+</p>
+
+<p>
+    Need assistance? Visit our help center at
+    <a href="https://eduschedule.name.ng/help" style="color: #005f73"
+        >eduschedule.name.ng/help</a
+    >
+    or contact us at
+    <a href="mailto:support@eduschedule.name.ng" style="color: #005f73"
+        >support@eduschedule.name.ng</a
+    >
+</p>
+
+<p>
+    <strong>Happy scheduling!</strong><br />
+    The EduSchedule Team
+</p>
+{% endblock %}

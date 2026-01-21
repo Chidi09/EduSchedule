@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Welcome to {{ school_name }}, {{ teacher_name }}!</h1>
+
+<div class="alert alert-info">
+    <strong>📧 You've been invited!</strong> An administrator at {{ school_name }} has created an account for you on EduSchedule.
+</div>
+
+<p>Hello {{ teacher_name }},</p>
+
+<p>You have been invited to join <strong>{{ school_name }}</strong> on EduSchedule, the intelligent timetabling platform that's revolutionizing how schools manage their schedules.</p>
+
+<h3>What is EduSchedule?</h3>
+<p>EduSchedule is an AI-powered system that creates conflict-free timetables automatically, taking into account:</p>
+<ul>
+    <li><strong>Your availability preferences</strong> - Set your preferred working hours and days</li>
+    <li><strong>Subject expertise</strong> - Only get assigned subjects you're qualified to teach</li>
+    <li><strong>Room requirements</strong> - Automatic matching with appropriate facilities</li>
+    <li><strong>Workload balancing</strong> - Fair distribution of teaching hours</li>
+</ul>
+
+<h3>Your Account Details</h3>
+<div class="alert alert-warning">
+    <strong>⚠️ Action Required:</strong> Please activate your account within 48 hours using the button below.
+</div>
+
+<p>An account has been created for you with the following details:</p>
+<ul>
+    <li><strong>Email:</strong> {{ teacher_email }}</li>
+    <li><strong>Role:</strong> Teacher</li>
+    <li><strong>School:</strong> {{ school_name }}</li>
+</ul>
+
+<div style="text-align: center; margin: 30px 0;">
+    <a href="{{ invite_link }}" class="button">Activate My Account</a>
+</div>
+
+<div class="stats">
+    <div class="stat-item">
+        <span class="stat-number">5 min</span>
+        <span class="stat-label">Setup Time</span>
+    </div>
+    <div class="stat-item">
+        <span class="stat-number">24/7</span>
+        <span class="stat-label">Access</span>
+    </div>
+    <div class="stat-item">
+        <span class="stat-number">100%</span>
+        <span class="stat-label">Secure</span>
+    </div>
+</div>
+
+<h3>What You Can Do</h3>
+<p>Once you activate your account, you'll be able to:</p>
+<ul>
+    <li>View your personalized teaching schedule</li>
+    <li>Set your availability preferences and constraints</li>
+    <li>Update your subject specializations</li>
+    <li>Receive notifications about schedule changes</li>
+    <li>Access your timetable on any device, anywhere</li>
+</ul>
+
+<div class="alert alert-info">
+    <strong>🔒 Security Notice:</strong> This invitation link will expire in 48 hours for your security. If you don't activate your account within this time, please contact your administrator to resend the invitation.
+</div>
+
+<h3>Need Help?</h3>
+<p>If you have any questions about EduSchedule or need assistance with your account setup:</p>
+
+<div style="text-align: center; margin: 20px 0;">
+    <a href="{{ help_url or (frontend_url + '/help') }}" class="button button-secondary">Get Help & Support</a>
+</div>
+
+<p>You can also contact your school administrator directly:</p>
+<ul>
+    <li><strong>Administrator:</strong> {{ admin_name or "School Administrator" }}</li>
+    <li><strong>Email:</strong> {{ admin_email or "Not provided" }}</li>
+</ul>
+
+<p>We're excited to have you on board and look forward to making your scheduling experience seamless!</p>
+
+<p><strong>Best regards,</strong><br>
+The EduSchedule Team</p>
+
+<div style="margin-top: 40px; padding: 20px; background-color: #f8f9fa; border-radius: 8px; font-size: 14px; color: #666;">
+    <p><strong>Note:</strong> If you believe you received this invitation in error, please ignore this email or contact {{ support_email or 'support@eduschedule.com' }} for assistance.</p>
+</div>
+{% endblock %}

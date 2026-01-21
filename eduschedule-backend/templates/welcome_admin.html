@@ -1,0 +1,81 @@
+{% extends "base.html" %} {% block content %}
+<h1>Welcome to EduSchedule, {{ name }}!</h1>
+
+<div class="alert alert-success">
+    <strong>🎉 Congratulations!</strong> Your school
+    <strong>{{ school_name }}</strong> has been successfully registered on
+    EduSchedule.
+</div>
+
+<p>
+    We're thrilled to have you join thousands of educators worldwide who trust
+    EduSchedule to create perfect, conflict-free timetables using AI-powered
+    optimization.
+</p>
+
+<h3>What's Next?</h3>
+<p>
+    Your journey to effortless timetabling starts now! Here's what you can do to
+    get the most out of EduSchedule:
+</p>
+
+<ul>
+    <li>
+        <strong>Set up your school profile</strong> - Add your basic
+        information, academic calendar, and preferences
+    </li>
+    <li>
+        <strong>Add your teaching staff</strong> - Invite teachers and configure
+        their availability and subject expertise
+    </li>
+    <li>
+        <strong>Define your resources</strong> - Set up classrooms, subjects,
+        and class groups
+    </li>
+    <li>
+        <strong>Generate your first timetable</strong> - Let our AI create
+        optimized schedules in minutes, not days
+    </li>
+</ul>
+
+<div style="text-align: center; margin: 30px 0">
+    <a href="{{ dashboard_url }}" class="button"
+        >Get Started - Go to Dashboard</a
+    >
+</div>
+
+<div class="stats">
+    <div class="stat-item">
+        <span class="stat-number">99.8%</span>
+        <span class="stat-label">Conflict Resolution</span>
+    </div>
+    <div class="stat-item">
+        <span class="stat-number">15 min</span>
+        <span class="stat-label">Average Generation</span>
+    </div>
+    <div class="stat-item">
+        <span class="stat-number">50+</span>
+        <span class="stat-label">Schools Trust Us</span>
+    </div>
+</div>
+
+<h3>Need Help Getting Started?</h3>
+<p>Our comprehensive setup guide will walk you through every step:</p>
+<div style="text-align: center; margin: 20px 0">
+    <a
+        href="{{ setup_guide_url or (frontend_url + '/guide') }}"
+        class="button button-secondary"
+        >View Setup Guide</a
+    >
+</div>
+
+<p>
+    If you have any questions or need assistance, our support team is here to
+    help. Simply reply to this email or contact us through the dashboard.
+</p>
+
+<p>
+    <strong>Welcome aboard!</strong><br />
+    The EduSchedule Team
+</p>
+{% endblock %}

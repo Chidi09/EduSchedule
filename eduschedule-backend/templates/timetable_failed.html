@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1 style="color: #AE2012;">Timetable Generation Failed ⚠️</h1>
+
+<div class="alert alert-error">
+    <strong>❌ Generation Unsuccessful:</strong> We were unable to generate a valid timetable for <strong>{{ term_name }}</strong> with the current constraints and requirements.
+</div>
+
+<p>Our AI scheduling engine attempted multiple optimization strategies but couldn't find a solution that satisfies all the specified constraints without conflicts.</p>
+
+<h3>Why This Happened</h3>
+<p>Timetable generation can fail for several reasons. The most common issues include:</p>
+
+<ul>
+    <li><strong>Insufficient Teacher Coverage:</strong> Not enough qualified teachers for the required subject periods</li>
+    <li><strong>Room Capacity Constraints:</strong> Classroom sizes are too small for certain class groups</li>
+    <li><strong>Over-Restrictive Availability:</strong> Teacher availability windows are too narrow</li>
+    <li><strong>Resource Conflicts:</strong> Specialized rooms (labs, gyms) have competing demands</li>
+    <li><strong>Excessive Workload:</strong> Too many teaching hours assigned relative to available time slots</li>
+    <li><strong>Incompatible Requirements:</strong> Conflicting constraints that cannot be simultaneously satisfied</li>
+</ul>
+
+<div class="stats">
+    <div class="stat-item">
+        <span class="stat-number">{{ attempts_made or "50+" }}</span>
+        <span class="stat-label">Solutions Attempted</span>
+    </div>
+    <div class="stat-item">
+        <span class="stat-number">{{ conflicts_found or "Multiple" }}</span>
+        <span class="stat-label">Conflicts Detected</span>
+    </div>
+    <div class="stat-item">
+        <span class="stat-number">{{ generation_time or "15 min" }}</span>
+        <span class="stat-label">Time Invested</span>
+    </div>
+</div>
+
+<h3>Recommended Solutions</h3>
+<div class="alert alert-warning">
+    <strong>💡 Quick Fixes:</strong> Try these common solutions to resolve the scheduling conflicts:
+</div>
+
+<ul>
+    <li><strong>Adjust Teacher Availability:</strong> Increase available time slots for over-constrained teachers</li>
+    <li><strong>Balance Subject Distribution:</strong> Reduce periods per week for subjects with limited teacher coverage</li>
+    <li><strong>Review Room Assignments:</strong> Consider flexible classroom usage or smaller class sizes</li>
+    <li><strong>Add Teaching Staff:</strong> Recruit additional teachers for subjects with high demand</li>
+    <li><strong>Modify Class Schedules:</strong> Spread classes across more time slots to reduce conflicts</li>
+    <li><strong>Relax Hard Constraints:</strong> Convert some strict requirements to preferences</li>
+</ul>
+
+{% if specific_issues and specific_issues|length > 0 %}
+<h3>Specific Issues Detected</h3>
+<div class="alert alert-info">
+    <strong>🔍 Detailed Analysis:</strong> Our system identified these specific problems:
+</div>
+<ul>
+{% for issue in specific_issues %}
+    <li><strong>{{ issue.type }}:</strong> {{ issue.description }}</li>
+{% endfor %}
+</ul>
+{% endif %}
+
+<h3>What You Can Do Now</h3>
+<p>To resolve these issues and successfully generate your timetable:</p>
+
+<div style="text-align: center; margin: 30px 0;">
+    <a href="{{ constraints_url or (frontend_url + '/dashboard/constraints') }}" class="button">Review & Adjust Constraints</a>
+</div>
+
+<p>Or take these specific actions:</p>
+<div style="text-align: center; margin: 20px 0;">
+    <a href="{{ teachers_url or (frontend_url + '/dashboard/teachers') }}" class="button button-secondary">Manage Teachers</a>
+    <a href="{{ rooms_url or (frontend_url + '/dashboard/rooms') }}" class="button button-secondary">Review Rooms</a>
+</div>
+
+<h3>Need Expert Help?</h3>
+<p>Our scheduling experts can help you optimize your constraints for successful timetable generation:</p>
+
+<ul>
+    <li><strong>Schedule a consultation</strong> with our timetabling specialists</li>
+    <li><strong>Request a custom analysis</strong> of your specific scheduling challenges</li>
+    <li><strong>Get best practice recommendations</strong> for your school's unique situation</li>
+</ul>
+
+<div style="text-align: center; margin: 20px 0;">
+    <a href="{{ support_url or (frontend_url + '/support') }}" class="button button-secondary">Contact Scheduling Expert</a>
+</div>
+
+<div class="alert alert-info">
+    <strong>💼 Enterprise Support:</strong> Premium subscribers get priority support and can schedule live consultations with our timetabling experts. <a href="{{ upgrade_url or (frontend_url + '/pricing') }}" style="color: #005F73; font-weight: bold;">Upgrade now</a> for faster resolution.
+</div>
+
+<h3>Common Resolution Tips</h3>
+<div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+    <h4 style="margin-top: 0; color: #005F73;">Quick Checklist:</h4>
+    <ul style="margin-bottom: 0;">
+        <li>✓ Ensure each subject has enough qualified teachers</li>
+        <li>✓ Verify room capacities match class sizes</li>
+        <li>✓ Check that total teaching hours don't exceed available slots</li>
+        <li>✓ Review teacher availability windows for flexibility</li>
+        <li>✓ Consider reducing periods per week for challenging subjects</li>
+    </ul>
+</div>
+
+<p>Don't worry - most scheduling challenges can be resolved with minor adjustments. Our system will help you identify and fix these issues quickly.</p>
+
+<div style="text-align: center; margin: 30px 0;">
+    <a href="{{ retry_url or (frontend_url + '/dashboard/timetables/new') }}" class="button">Try Again After Adjustments</a>
+</div>
+
+<p>We're here to help you succeed. If you continue to experience issues, please don't hesitate to reach out to our support team.</p>
+
+<p><strong>We'll get your schedule sorted!</strong><br>
+The EduSchedule Team</p>
+
+<div style="margin-top: 40px; padding: 20px; background-color: #fff3cd; border-radius: 8px; border-left: 4px solid #ffc107;">
+    <p style="margin-bottom: 0; font-size: 14px;"><strong>💬 Quick Support:</strong> Reply to this email with your specific questions, and our team will provide personalized recommendations within 24 hours.</p>
+</div>
+{% endblock %}

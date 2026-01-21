@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1 style="color: #10B981;">Payment Successful! 💳✅</h1>
+
+<div class="alert alert-success">
+    <strong>🎉 Thank you for your payment!</strong> Your transaction has been processed successfully and your premium features are now active.
+</div>
+
+<p>Hello {{ customer_name }},</p>
+
+<p>We've successfully received your payment for the <strong>{{ plan_name }}</strong> plan. Your account has been upgraded and you now have access to all premium features!</p>
+
+<h3>Payment Receipt</h3>
+<div class="stats">
+    <div class="stat-item">
+        <span class="stat-number">{{ currency }}{{ amount }}</span>
+        <span class="stat-label">Amount Paid</span>
+    </div>
+    <div class="stat-item">
+        <span class="stat-number">{{ plan_name }}</span>
+        <span class="stat-label">Plan Selected</span>
+    </div>
+    <div class="stat-item">
+        <span class="stat-number">{{ plan_duration }}</span>
+        <span class="stat-label">Billing Period</span>
+    </div>
+</div>
+
+<div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+    <h4 style="margin-top: 0; color: #005F73;">Transaction Details</h4>
+    <ul style="margin-bottom: 0; font-family: monospace; font-size: 14px;">
+        <li><strong>Transaction ID:</strong> {{ transaction_id }}</li>
+        <li><strong>Reference:</strong> <span class="code">{{ reference_id }}</span></li>
+        <li><strong>Payment Method:</strong> {{ payment_method or "Card" }}</li>
+        <li><strong>Transaction Date:</strong> {{ payment_date }}</li>
+        <li><strong>Status:</strong> <span style="color: #10B981; font-weight: bold;">Completed</span></li>
+        {% if next_billing_date %}
+        <li><strong>Next Billing:</strong> {{ next_billing_date }}</li>
+        {% endif %}
+    </ul>
+</div>
+
+<h3>What's Included in Your {{ plan_name }} Plan</h3>
+<p>You now have access to these premium features:</p>
+
+<ul>
+    <li><strong>✅ Unlimited Timetable Generation</strong> - Create as many schedules as you need</li>
+    <li><strong>✅ Advanced AI Optimization</strong> - Smart teacher preference matching and workload balancing</li>
+    <li><strong>✅ Priority Processing</strong> - Your timetables are generated first</li>
+    <li><strong>✅ Multiple Export Formats</strong> - PDF, Excel, CSV, and Google Calendar integration</li>
+    <li><strong>✅ Advanced Analytics</strong> - Detailed reports on schedule quality and optimization</li>
+    <li><strong>✅ Premium Support</strong> - Priority email support and live chat</li>
+    <li><strong>✅ Custom Branding</strong> - Add your school logo and colors to timetables</li>
+    <li><strong>✅ API Access</strong> - Integrate with your existing school management systems</li>
+</ul>
+
+<div class="alert alert-info">
+    <strong>🚀 Pro Tip:</strong> All your premium features are automatically activated! Start using advanced scheduling options in your dashboard right away.
+</div>
+
+<h3>What You Can Do Now</h3>
+<p>Ready to make the most of your upgraded account? Here's what you can do:</p>
+
+<div style="text-align: center; margin: 30px 0;">
+    <a href="{{ dashboard_url }}" class="button">Explore Premium Dashboard</a>
+</div>
+
+<div style="text-align: center; margin: 20px 0;">
+    <a href="{{ features_url or (dashboard_url + '/features') }}" class="button button-secondary">View All Premium Features</a>
+    <a href="{{ billing_url or (dashboard_url + '/billing') }}" class="button button-secondary">Manage Billing</a>
+</div>
+
+<h3>Invoice & Billing</h3>
+<p>This email serves as your receipt. You can also download a detailed PDF invoice from your billing dashboard.</p>
+
+{% if auto_renewal %}
+<div class="alert alert-warning">
+    <strong>🔄 Auto-Renewal Enabled:</strong> Your subscription will automatically renew on {{ next_billing_date }} for {{ currency }}{{ amount }}. You can modify or cancel this anytime in your billing settings.
+</div>
+{% endif %}
+
+<div style="text-align: center; margin: 20px 0;">
+    <a href="{{ invoice_url or (billing_url + '/invoices') }}" class="button button-secondary">Download Invoice (PDF)</a>
+</div>
+
+<h3>Need Help Getting Started?</h3>
+<p>Our premium onboarding guide will help you make the most of your new features:</p>
+
+<ul>
+    <li><strong>Advanced Scheduling Tutorials</strong> - Step-by-step guides for complex timetables</li>
+    <li><strong>Integration Guides</strong> - Connect with your existing school systems</li>
+    <li><strong>Best Practices</strong> - Tips from successful schools using EduSchedule</li>
+    <li><strong>Video Walkthroughs</strong> - Visual guides for all premium features</li>
+</ul>
+
+<div style="text-align: center; margin: 20px 0;">
+    <a href="{{ onboarding_url or (dashboard_url + '/onboarding') }}" class="button button-secondary">Start Premium Onboarding</a>
+</div>
+
+<h3>Questions or Concerns?</h3>
+<p>Our premium support team is here to help you succeed:</p>
+
+<ul>
+    <li><strong>Live Chat:</strong> Available 9 AM - 5 PM EST in your dashboard</li>
+    <li><strong>Priority Email:</strong> Get responses within 2 hours during business days</li>
+    <li><strong>Phone Support:</strong> Schedule a call with our timetabling experts</li>
+    <li><strong>Training Sessions:</strong> Free group training for your teaching staff</li>
+</ul>
+
+<div style="text-align: center; margin: 20px 0;">
+    <a href="{{ support_url or (dashboard_url + '/support') }}" class="button button-secondary">Contact Premium Support</a>
+</div>
+
+<div style="background-color: #e8f5e8; padding: 20px; border-radius: 8px; margin: 30px 0; border-left: 4px solid #10B981;">
+    <h4 style="margin-top: 0; color: #065f46;">🏆 Welcome to Premium!</h4>
+    <p style="margin-bottom: 0;">Thank you for choosing EduSchedule Premium. We're committed to making your scheduling experience exceptional. If there's anything we can do to help you succeed, please don't hesitate to reach out.</p>
+</div>
+
+<p>Thank you for upgrading to EduSchedule Premium! We're excited to help you create the perfect schedules for your school.</p>
+
+<p><strong>Happy scheduling!</strong><br>
+The EduSchedule Team</p>
+
+<div style="margin-top: 40px; padding: 20px; background-color: #f8f9fa; border-radius: 8px; font-size: 14px; color: #666;">
+    <h4 style="margin-top: 0; color: #005F73;">Billing & Support Information</h4>
+    <ul style="margin-bottom: 0;">
+        <li><strong>Billing Questions:</strong> {{ billing_email or 'billing@eduschedule.com' }}</li>
+        <li><strong>Technical Support:</strong> {{ support_email or 'support@eduschedule.com' }}</li>
+        <li><strong>Account Management:</strong> Available in your dashboard</li>
+        <li><strong>Refund Policy:</strong> 30-day money-back guarantee</li>
+    </ul>
+</div>
+{% endblock %}

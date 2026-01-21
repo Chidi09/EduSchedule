@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1 style="color: #DC2626;">Payment Unsuccessful ❌</h1>
+
+<div class="alert alert-error">
+    <strong>💳 Payment Failed:</strong> We were unable to process your payment for the <strong>{{ plan_name }}</strong> plan. Please review the details below and try again.
+</div>
+
+<p>Hello {{ customer_name }},</p>
+
+<p>Unfortunately, we encountered an issue while processing your payment. This can happen for several reasons, but don't worry - it's usually easy to resolve!</p>
+
+<h3>Transaction Details</h3>
+<div style="background-color: #fef2f2; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #DC2626;">
+    <ul style="margin-bottom: 0; font-family: monospace; font-size: 14px;">
+        <li><strong>Attempted Amount:</strong> {{ currency }}{{ amount }}</li>
+        <li><strong>Plan:</strong> {{ plan_name }}</li>
+        <li><strong>Reference:</strong> <span class="code">{{ reference_id }}</span></li>
+        <li><strong>Attempt Date:</strong> {{ attempt_date }}</li>
+        <li><strong>Status:</strong> <span style="color: #DC2626; font-weight: bold;">Failed</span></li>
+        {% if failure_reason %}
+        <li><strong>Reason:</strong> {{ failure_reason }}</li>
+        {% endif %}
+    </ul>
+</div>
+
+<h3>Common Reasons for Payment Failure</h3>
+<p>Payment failures typically occur due to:</p>
+
+<ul>
+    <li><strong>Insufficient Funds:</strong> Your account doesn't have enough balance</li>
+    <li><strong>Card Expired:</strong> Your payment card has expired</li>
+    <li><strong>Incorrect Details:</strong> Card number, CVV, or expiry date entered incorrectly</li>
+    <li><strong>Bank Restrictions:</strong> Your bank has blocked international or online transactions</li>
+    <li><strong>Network Issues:</strong> Temporary connectivity problems during processing</li>
+    <li><strong>Security Verification:</strong> Additional verification required by your bank</li>
+</ul>
+
+<h3>How to Resolve This</h3>
+<div class="alert alert-info">
+    <strong>💡 Quick Fixes:</strong> Try these steps to complete your payment successfully:
+</div>
+
+<ol>
+    <li><strong>Check Your Card Details</strong> - Verify card number, expiry date, and CVV are correct</li>
+    <li><strong>Ensure Sufficient Funds</strong> - Make sure your account has enough balance</li>
+    <li><strong>Contact Your Bank</strong> - Ask them to allow transactions to "EduSchedule" or "Paystack"</li>
+    <li><strong>Try a Different Card</strong> - Use an alternative payment method if available</li>
+    <li><strong>Wait and Retry</strong> - Sometimes temporary issues resolve themselves</li>
+</ol>
+
+<div style="text-align: center; margin: 30px 0;">
+    <a href="{{ retry_payment_url }}" class="button">Try Payment Again</a>
+</div>
+
+<div class="stats">
+    <div class="stat-item">
+        <span class="stat-number">{{ currency }}{{ amount }}</span>
+        <span class="stat-label">Amount Due</span>
+    </div>
+    <div class="stat-item">
+        <span class="stat-number">{{ plan_name }}</span>
+        <span class="stat-label">Selected Plan</span>
+    </div>
+    <div class="stat-item">
+        <span class="stat-number">24/7</span>
+        <span class="stat-label">Support Available</span>
+    </div>
+</div>
+
+<h3>Alternative Payment Options</h3>
+<p>If you continue to experience issues with your current payment method, consider these alternatives:</p>
+
+<ul>
+    <li><strong>Different Payment Card</strong> - Try a Visa, Mastercard, or Verve card</li>
+    <li><strong>Bank Transfer</strong> - Direct bank transfer option available</li>
+    <li><strong>Mobile Money</strong> - Pay using your mobile wallet (MTN, Airtel, etc.)</li>
+    <li><strong>Contact Sales</strong> - Our team can arrange alternative payment methods</li>
+</ul>
+
+<div style="text-align: center; margin: 20px 0;">
+    <a href="{{ payment_methods_url or (frontend_url + '/payment-methods') }}" class="button button-secondary">View All Payment Options</a>
+</div>
+
+<h3>Still Having Trouble?</h3>
+<div class="alert alert-warning">
+    <strong>🆘 Need Help?</strong> Our payment specialists are here to help you complete your purchase quickly and securely.
+</div>
+
+<p>If you've tried the above solutions and still can't complete your payment, please contact our support team:</p>
+
+<ul>
+    <li><strong>Live Chat:</strong> Available in your dashboard for immediate assistance</li>
+    <li><strong>Email Support:</strong> Send us your transaction reference for quick resolution</li>
+    <li><strong>Phone Support:</strong> Call us during business hours for personal assistance</li>
+    <li><strong>WhatsApp:</strong> Message us for instant help with payment issues</li>
+</ul>
+
+<div style="text-align: center; margin: 20px 0;">
+    <a href="{{ support_url or (frontend_url + '/support') }}" class="button button-secondary">Contact Payment Support</a>
+</div>
+
+<h3>Your Premium Features Are Waiting!</h3>
+<p>Once your payment is successful, you'll immediately get access to:</p>
+
+<ul>
+    <li><strong>✨ Advanced AI Scheduling</strong> - Smart optimization algorithms</li>
+    <li><strong>📊 Detailed Analytics</strong> - Comprehensive scheduling reports</li>
+    <li><strong>⚡ Priority Processing</strong> - Faster timetable generation</li>
+    <li><strong>📱 Mobile App Access</strong> - Full-featured mobile application</li>
+    <li><strong>🎨 Custom Branding</strong> - Add your school's logo and colors</li>
+    <li><strong>🔌 API Integration</strong> - Connect with your existing systems</li>
+</ul>
+
+<div class="alert alert-info">
+    <strong>💰 Special Offer:</strong> This payment link will remain active for 48 hours. Complete your payment within this time to secure your current pricing.
+</div>
+
+<h3>Payment Security</h3>
+<p>Your payment security is our top priority:</p>
+
+<div style="background-color: #f0f9ff; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #3B82F6;">
+    <ul style="margin-bottom: 0;">
+        <li><strong>🔒 SSL Encryption:</strong> All transactions are encrypted end-to-end</li>
+        <li><strong>🏦 PCI Compliance:</strong> We meet the highest security standards</li>
+        <li><strong>🛡️ Fraud Protection:</strong> Advanced fraud detection systems</li>
+        <li><strong>💳 Secure Processing:</strong> Powered by trusted payment partners</li>
+    </ul>
+</div>
+
+<h3>Frequently Asked Questions</h3>
+<div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+    <h4 style="margin-top: 0; color: #005F73;">Common Payment Questions</h4>
+
+    <p><strong>Q: Will I be charged multiple times if I retry?</strong></p><br>
+    A: No, failed transactions are not charged. You'll only pay when the transaction succeeds.</p>
+
+    <p><strong>Q: How long do I have to complete the payment?</strong><br>
+    A: Your payment link remains active for 48 hours from the original attempt.</p>
+
+    <p><strong>Q: Can I change my plan during retry?</strong><br>
+    A: Yes, you can select a different plan when you retry the payment.</p>
+
+    <p style="margin-bottom: 0;"><strong>Q: Is my card information safe?</strong><br>
+    A: Absolutely. We never store your card details and use bank-level encryption.</p>
+</div>
+
+<div style="text-align: center; margin: 30px 0;">
+    <a href="{{ retry_payment_url }}" class="button">Complete Your Payment Now</a>
+</div>
+
+<p>Don't let a temporary payment hiccup stop you from accessing EduSchedule Premium! We're here to help you get set up and start creating amazing timetables.</p>
+
+<p><strong>We'll help you get this sorted!</strong><br>
+The EduSchedule Team</p>
+
+<div style="margin-top: 40px; padding: 20px; background-color: #fffbeb; border-radius: 8px; border-left: 4px solid #F59E0B;">
+    <p style="margin-bottom: 0; font-size: 14px;"><strong>⚡ Quick Resolution:</strong> Reply to this email with your transaction reference ({{ reference_id }}) and we'll investigate the issue immediately. Most payment problems can be resolved within 30 minutes.</p>
+</div>
+{% endblock %}
