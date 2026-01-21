@@ -1,61 +1,58 @@
-import { ref, onMounted } from 'vue';
 import { defineStore } from 'pinia';
-// Correct the import path if your file is named 'supabase.ts'
 import { supabase } from '../supabase';
-import type { User, Session, AuthChangeEvent, SignUpWithPasswordCredentials } from '@supabase/supabase-js';
+import type { Session, User } from '@supabase/supabase-js';
 
-// Define an interface for your custom profile data
-interface Profile {
-  id: string;
-  name: string;
-  school_id: string | null;
-  role: 'admin' | 'teacher';
-  // Add other profile fields here
-}
+export const useAuthStore = defineStore('auth', {
+  state: () => ({
+    session: null as Session | null,
+    user: null as User | null,
+    profile: null as any | null,
+    loading: true,
+  }),
+  
+  actions: {
+    async initialize() {
+      try {
+        const { data } = await supabase.auth.getSession();
+        this.session = data.session;
+        this.user = data.session?.user || null;
+        
+        if (this.user) {
+          await this.fetchProfile();
+        }
+      } catch (error) {
+        console.error("Auth init error:", error);
+      } finally {
+        this.loading = false;
+      }
 
-export const useAuthStore = defineStore('auth', () => {
-  const user = ref<User | null>(null);
-  const session = ref<Session | null>(null);
-  const profile = ref<Profile | null>(null); // Use the Profile interface
-  const isAuthReady = ref(false);
+      // Listen for auth changes
+      supabase.auth.onAuthStateChange((_event, session) => {
+        this.session = session;
+        this.user = session?.user || null;
+        if (this.user) this.fetchProfile();
+      });
+    },
 
-  supabase.auth.onAuthStateChange(async (event: AuthChangeEvent, newSession: Session | null) => {
-    session.value = newSession;
-    user.value = newSession?.user ?? null;
-
-    if (user.value) {
-      // If the user is logged in, fetch their profile from our 'profiles' table
-      const { data } = await supabase
-        .from('profiles') // <-- Correct table name
+    async fetchProfile() {
+      if (!this.user) return;
+      
+      const { data, error } = await supabase
+        .from('profiles')
         .select('*')
-        .eq('id', user.value.id)
+        .eq('id', this.user.id)
         .single();
-      profile.value = data;
-    } else {
-      profile.value = null;
+        
+      if (!error && data) {
+        this.profile = data;
+      }
+    },
+
+    async signOut() {
+      await supabase.auth.signOut();
+      this.session = null;
+      this.user = null;
+      this.profile = null;
     }
-    isAuthReady.value = true;
-  });
-
-  const signUp = async (credentials: SignUpWithPasswordCredentials) => {
-    return await supabase.auth.signUp(credentials);
-  };
-
-  const signIn = async (credentials: SignUpWithPasswordCredentials) => {
-    return await supabase.auth.signInWithPassword(credentials);
-  };
-
-  const logout = async () => {
-    await supabase.auth.signOut();
-  };
-
-  onMounted(async () => {
-    const { data } = await supabase.auth.getSession();
-    session.value = data.session;
-    user.value = data.session?.user ?? null;
-    isAuthReady.value = true;
-  });
-
-  return { user, session, profile, isAuthReady, signUp, signIn, logout };
+  }
 });
-
