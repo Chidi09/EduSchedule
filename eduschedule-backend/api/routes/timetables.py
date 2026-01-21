@@ -1,10 +1,13 @@
 import asyncio
+import logging
 from fastapi import APIRouter, Depends, HTTPException, status
 from core.dependencies import get_current_user, supabase
 from services.scheduler import TimetableScheduler
 from services.ai_orchestrator import extract_metrics, rank_candidates_with_gemini, explain_candidate_with_gpt
 import uuid
 import concurrent.futures
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/timetables", tags=["Timetables"], dependencies=[Depends(get_current_user)])
 
@@ -13,8 +16,11 @@ executor = concurrent.futures.ThreadPoolExecutor(max_workers=3)
 
 def run_solver(teachers_data, rooms_data, subjects_data, classes_data, teacher_subjects_data):
     """Helper function to run solver synchronously"""
+    logger.info(f"Running solver with {len(teachers_data)} teachers, {len(classes_data)} classes")
     scheduler = TimetableScheduler(teachers_data, rooms_data, subjects_data, classes_data, teacher_subjects_data)
-    return scheduler.solve(solution_limit=5)
+    solutions = scheduler.solve(solution_limit=5)
+    logger.info(f"Solver completed, found {len(solutions)} solutions")
+    return solutions
 
 @router.post("/generate", status_code=status.HTTP_202_ACCEPTED)
 async def generate_timetable():
@@ -29,7 +35,7 @@ async def generate_timetable():
     if not teachers or not classes:
         raise HTTPException(status_code=400, detail="Insufficient data to generate timetable.")
 
-    # 2. Run solver in background thread (CPU bound)
+    # 2. Run solver in background thread (CPU bound) - NO DATABASE CHANGES YET
     loop = asyncio.get_event_loop()
     try:
         solutions = await loop.run_in_executor(
@@ -43,21 +49,49 @@ async def generate_timetable():
     if not solutions:
         raise HTTPException(status_code=500, detail="Could not find any valid solutions.")
 
-    # 3. Save results
-    new_timetable = supabase.table('timetables').insert({"term": "Fall 2025"}).execute().data[0]
+    # 3. ONLY NOW create database records (transactional integrity)
+    try:
+        # Create timetable only after successful generation
+        new_timetable = supabase.table('timetables').insert({"term": "Fall 2025"}).execute().data[0]
 
-    for solution in solutions:
-        candidate_id = str(uuid.uuid4())
-        metrics = extract_metrics(solution, teachers)
-        supabase.table('candidates').insert({
-            "id": candidate_id, "timetable_id": new_timetable['id'], "metrics": metrics
-        }).execute()
+        for solution in solutions:
+            candidate_id = str(uuid.uuid4())
+            metrics = extract_metrics(solution, teachers)
 
-        for assignment in solution:
-            assignment['candidate_id'] = candidate_id
-        supabase.table('assignments').insert(solution).execute()
+            # Create candidate record
+            candidate_result = supabase.table('candidates').insert({
+                "id": candidate_id,
+                "timetable_id": new_timetable['id'],
+                "metrics": metrics
+            }).execute()
 
-    return {"message": f"{len(solutions)} candidates generated.", "timetable_id": new_timetable['id']}
+            if not candidate_result.data:
+                raise Exception(f"Failed to create candidate {candidate_id}")
+
+            # Create assignment records
+            assignments_with_ids = []
+            for assignment in solution:
+                assignment_copy = assignment.copy()
+                assignment_copy['candidate_id'] = candidate_id
+                assignment_copy['timetable_id'] = new_timetable['id']
+                assignments_with_ids.append(assignment_copy)
+
+            assignment_result = supabase.table('assignments').insert(assignments_with_ids).execute()
+            if not assignment_result.data:
+                raise Exception(f"Failed to create assignments for candidate {candidate_id}")
+
+        return {"message": f"{len(solutions)} candidates generated.", "timetable_id": new_timetable['id']}
+
+    except Exception as e:
+        # If database operations fail, clean up any partial data
+        if 'new_timetable' in locals():
+            try:
+                # Delete the timetable and cascade will handle candidates/assignments
+                supabase.table('timetables').delete().eq('id', new_timetable['id']).execute()
+            except:
+                pass  # Best effort cleanup
+
+        raise HTTPException(status_code=500, detail=f"Database error during timetable creation: {str(e)}")
 
 @router.get("/")
 async def get_timetables():

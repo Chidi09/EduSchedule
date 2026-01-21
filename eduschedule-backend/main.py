@@ -1,7 +1,19 @@
 import os
+import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from api.routes import users, teachers, rooms, subjects, classes, auth, timetables, payments, assignments, public_v1, public, schools
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.StreamHandler(),
+        logging.FileHandler('logs/app.log', mode='a') if os.path.exists('logs') else logging.NullHandler()
+    ]
+)
+logger = logging.getLogger(__name__)
 
 app = FastAPI(
     title="EduSchedule API",
@@ -37,4 +49,14 @@ app.include_router(schools.router)
 
 @app.get("/")
 def read_root():
+    logger.info("Root endpoint accessed")
     return {"message": "Welcome to the EduSchedule API!"}
+
+@app.on_event("startup")
+async def startup_event():
+    logger.info("EduSchedule API starting up...")
+    logger.info(f"CORS Origins: {origins}")
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    logger.info("EduSchedule API shutting down...")

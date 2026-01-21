@@ -36,7 +36,8 @@ def verify_and_create_user(user_data: UserCreate, current_user: dict = Depends(g
             'id': user_id,  # Link to auth.users
             'email': email,
             'name': user_data.name,
-            'role': 'admin'  # Default role for self-registered users
+            'role': 'guest',  # SECURITY FIX: Default role for self-registered users
+            'school_id': None  # Must be assigned to a school by existing admin
         }
 
         # --- CHANCE DEAL LOGIC ---
