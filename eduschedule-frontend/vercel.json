@@ -1,13 +1,8 @@
 {
-  "functions": {
-    "app/[[...catchall]].vue": {
-      "maxDuration": 30
-    }
-  },
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "https://your-railway-app-url.up.railway.app/api/$1"
+      "destination": "https://api.eduschedule.name.ng/api/$1"
     },
     {
       "source": "/(.*)",
@@ -81,7 +76,5 @@
     }
   ],
   "trailingSlash": false,
-  "cleanUrls": true,
-  "framework": null,
-  "crons": []
+  "cleanUrls": true
 }
