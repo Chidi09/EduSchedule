@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ref, computed, watch, nextTick } from 'vue';
+import { ref, watch } from 'vue';
 import draggable from 'vuedraggable';
+import { useAuthStore } from '@/stores/auth';
 
 // Define the structure for an assignment item
 interface Assignment {
@@ -29,11 +30,12 @@ const props = defineProps<{
   assignmentsData: RawAssignment[]; // The raw assignments from the candidate
 }>();
 
+const authStore = useAuthStore();
 const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
 const periods = Array.from({ length: 8 }, (_, i) => `Period ${i + 1}`);
 
-// A 2D array representing our grid, e.g., grid[dayIndex][periodIndex]
-const grid = ref<Assignment[][]>([]);
+// A 3D array representing our grid: grid[dayIndex][periodIndex] = Assignment[]
+const grid = ref<Assignment[][][]>([]);
 
 // Store pending moves for rollback if validation fails
 const pendingMoves = ref<Map<string, { from: [number, number], to: [number, number] }>>(new Map());
@@ -43,19 +45,18 @@ const showToast = ref(false);
 const toastMessage = ref('');
 const toastType = ref<'success' | 'error'>('success');
 
-// This function transforms the flat assignment list into our 2D grid
+// This function transforms the flat assignment list into our 3D grid
 function initializeGrid() {
-  const newGrid: Assignment[][] = Array.from({ length: days.length }, () =>
+  const newGrid: Assignment[][][] = Array.from({ length: days.length }, () =>
     Array.from({ length: periods.length }, () => [])
   );
 
   props.assignmentsData.forEach(a => {
-    // Each cell will now hold an array to make it a draggable list
     const assignment: Assignment = {
       id: a.id,
-      subject: `Sub ${a.subject_id.slice(0,4)}`,
-      teacher: `T ${a.teacher_id.slice(0,4)}`,
-      room: `R ${a.room_id.slice(0,4)}`,
+      subject: `Sub ${a.subject_id.slice(0, 4)}`,
+      teacher: `T ${a.teacher_id.slice(0, 4)}`,
+      room: `R ${a.room_id.slice(0, 4)}`,
       original_day: a.day_of_week,
       original_period: a.period,
     };
@@ -64,43 +65,37 @@ function initializeGrid() {
   grid.value = newGrid;
 }
 
-// Optimistic UI: Apply move immediately, then validate
-async function handleMove(evt: any, dayIndex: number, periodIndex: number) {
-  if (!evt.added) return;
+// Show toast notification
+function showToastMessage(message: string, type: 'success' | 'error') {
+  toastMessage.value = message;
+  toastType.value = type;
+  showToast.value = true;
 
-  const assignment = evt.added.element as Assignment;
-  const fromDay = assignment.original_day;
-  const fromPeriod = assignment.original_period;
+  setTimeout(() => {
+    showToast.value = false;
+  }, 3000);
+}
 
-  // Mark as moving for visual feedback
-  assignment.isMoving = true;
-  assignment.moveError = undefined;
-
-  // Store the move for potential rollback
-  pendingMoves.value.set(assignment.id, {
-    from: [fromDay, fromPeriod],
-    to: [dayIndex, periodIndex]
-  });
-
+async function validateMoveApi(assignmentId: string, newDay: number, newPeriod: number) {
   try {
-    // Simulate server validation (replace with actual API call)
-    const isValid = await validateMove(assignment.id, dayIndex, periodIndex);
+    const token = authStore.session?.access_token;
+    const response = await fetch('/api/assignments/validate-move', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        assignment_id: assignmentId,
+        new_day: newDay,
+        new_period: newPeriod,
+      }),
+    });
 
-    if (isValid) {
-      // Success - update original position and clear moving state
-      assignment.original_day = dayIndex;
-      assignment.original_period = periodIndex;
-      assignment.isMoving = false;
-      pendingMoves.value.delete(assignment.id);
-
-      showToastMessage('Move successful!', 'success');
-    } else {
-      // Failed validation - rollback the move
-      await rollbackMove(assignment);
-    }
+    if (!response.ok) return { valid: false, reason: 'Server error' };
+    return await response.json();
   } catch (error) {
-    console.error('Move validation error:', error);
-    await rollbackMove(assignment);
+    return { valid: false, reason: 'Network error' };
   }
 }
 
@@ -131,85 +126,51 @@ async function rollbackMove(assignment: Assignment) {
 
   // Clear error after 3 seconds
   setTimeout(() => {
-    const restoredAssignment = grid.value[fromDay][fromPeriod].find(a => a.id === assignment.id);
+    const dayCell = grid.value[fromDay][fromPeriod];
+    const restoredAssignment = dayCell.find(a => a.id === assignment.id);
     if (restoredAssignment) {
       restoredAssignment.moveError = undefined;
     }
   }, 3000);
 }
 
-// Mock validation function - replace with actual API call
-async function validateMove(assignmentId: string, newDay: number, newPeriod: number): Promise<boolean> {
-  // Simulate network delay
-  await new Promise(resolve => setTimeout(resolve, 500));
+// Optimistic UI: Apply move immediately, then validate
+// evt is the change event from vuedraggable
+async function handleMove(evt: any, dayIndex: number, periodIndex: number) {
+  if (!evt.added) return;
 
-  // Mock validation logic - replace with actual server validation
-  // For demo: randomly succeed/fail (80% success rate)
-  return Math.random() > 0.2;
-}
+  const assignment = evt.added.element as Assignment;
+  const fromDay = assignment.original_day;
+  const fromPeriod = assignment.original_period;
 
-// Show toast notification
-function showToastMessage(message: string, type: 'success' | 'error') {
-  toastMessage.value = message;
-  toastType.value = type;
-  showToast.value = true;
+  // Mark as moving for visual feedback
+  assignment.isMoving = true;
+  assignment.moveError = undefined;
 
-  setTimeout(() => {
-    showToast.value = false;
-  }, 3000);
+  // Store the move for potential rollback
+  pendingMoves.value.set(assignment.id, {
+    from: [fromDay, fromPeriod],
+    to: [dayIndex, periodIndex]
+  });
+
+  const result = await validateMoveApi(assignment.id, dayIndex, periodIndex);
+
+  if (result.valid) {
+    // Success - update original position and clear moving state
+    assignment.original_day = dayIndex;
+    assignment.original_period = periodIndex;
+    assignment.isMoving = false;
+    pendingMoves.value.delete(assignment.id);
+    showToastMessage('Move successful!', 'success');
+  } else {
+    // Failed validation - rollback the move
+    await rollbackMove(assignment);
+  }
 }
 
 // Re-initialize the grid whenever the input data changes
 watch(() => props.assignmentsData, initializeGrid, { immediate: true });
 
-// This function is called when a user finishes a drag-and-drop action
-async function onDragEnd(event: any) {
-  const { to, from, oldIndex, newIndex, item } = event;
-
-  // Extract day and period from the element's dataset
-  const toDay = parseInt(to.dataset.day);
-  const toPeriod = parseInt(to.dataset.period);
-  const fromDay = parseInt(from.dataset.day);
-  const fromPeriod = parseInt(from.dataset.period);
-
-  // The assignment that was moved
-  const movedAssignment = grid.value[fromDay][fromPeriod][0];
-
-  // Call our backend to validate the move
-  const validationResponse = await validateMove(movedAssignment, toDay, toPeriod);
-
-  if (!validationResponse.valid) {
-    alert(`Invalid Move: ${validationResponse.reason}`);
-
-    // Move is invalid, so we snap it back to its original position
-    // This requires a bit of a trick: move it to the new spot, then back to the old one.
-    const itemToMoveBack = grid.value[toDay][toPeriod].splice(0, 1)[0];
-    grid.value[fromDay][fromPeriod].push(itemToMoveBack);
-
-  } else {
-    // Move is valid, the UI is already updated by the draggable library.
-    // Optionally, you can show a success message.
-    console.log("Move successful!");
-  }
-}
-
-async function validateMove(assignment: Assignment, newDay: number, newPeriod: number) {
-  // This would use the authStore to get the token
-  // const token = ...;
-  const response = await fetch('/api/assignments/validate-move', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      // 'Authorization': `Bearer ${token}`
-    },
-    body: JSON.stringify({
-      assignment_id: assignment.id,
-      new_day: newDay,
-      new_period: newPeriod,
-    }),
-  });
-  return response.json();
-}
 </script>
 
 <template>
@@ -233,10 +194,9 @@ async function validateMove(assignment: Assignment, newDay: number, newPeriod: n
       <div v-for="(day, dayIndex) in days" :key="day"
            class="border rounded-md min-h-[90px] bg-brand-light touch-manipulation">
         <draggable
-          :list="grid[dayIndex] ? grid[dayIndex][periodIndex] : []"
+          :list="grid[dayIndex][periodIndex]"
           group="assignments"
-          @add="(evt) => handleMove(evt, dayIndex, periodIndex)"
-          @end="onDragEnd"
+          @change="(evt: any) => handleMove(evt, dayIndex, periodIndex)"
           item-key="id"
           class="h-full w-full min-h-[90px] touch-manipulation"
           :data-day="dayIndex"
@@ -248,7 +208,7 @@ async function validateMove(assignment: Assignment, newDay: number, newPeriod: n
         >
           <template #item="{ element }">
             <div :class="[
-              'text-white rounded-md p-3 text-xs flex flex-col h-full min-h-[44px] transition-all duration-200',
+              'text-white rounded-md p-3 text-xs flex flex-col h-full min-h-[44px] transition-all duration-200 relative',
               'touch-manipulation select-none',
               element.isMoving ? 'bg-yellow-500 animate-pulse' : 'bg-brand-secondary',
               element.moveError ? 'bg-red-500' : '',
