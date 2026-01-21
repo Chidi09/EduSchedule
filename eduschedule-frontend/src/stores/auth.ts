@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { supabase } from '../supabase';
+import { supabase, isSupabaseConfigured } from '../supabase';
 import type { Session, User, SignUpWithPasswordCredentials } from '@supabase/supabase-js';
 
 export const useAuthStore = defineStore('auth', {
@@ -9,11 +9,19 @@ export const useAuthStore = defineStore('auth', {
     profile: null as any | null,
     loading: true,
     isAuthReady: false,
+    isConfigured: isSupabaseConfigured,
   }),
   
   actions: {
     async initialize() {
       try {
+        if (!this.isConfigured) {
+          console.warn('Supabase is not configured. Authentication will not work.');
+          this.loading = false;
+          this.isAuthReady = true;
+          return;
+        }
+
         const { data } = await supabase.auth.getSession();
         this.session = data.session;
         this.user = data.session?.user || null;
@@ -42,29 +50,41 @@ export const useAuthStore = defineStore('auth', {
     },
 
     async fetchProfile() {
-      if (!this.user) return;
+      if (!this.user || !this.isConfigured) return;
       
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', this.user.id)
-        .single();
-        
-      if (!error && data) {
-        this.profile = data;
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', this.user.id)
+          .single();
+          
+        if (!error && data) {
+          this.profile = data;
+        }
+      } catch (error) {
+        console.error('Failed to fetch profile:', error);
       }
     },
 
     async signUp(credentials: SignUpWithPasswordCredentials) {
+      if (!this.isConfigured) {
+        return { data: { user: null, session: null }, error: { message: 'Supabase not configured' } };
+      }
       return await supabase.auth.signUp(credentials);
     },
 
     async signIn(credentials: SignUpWithPasswordCredentials) {
+      if (!this.isConfigured) {
+        return { data: { user: null, session: null }, error: { message: 'Supabase not configured' } };
+      }
       return await supabase.auth.signInWithPassword(credentials);
     },
 
     async signOut() {
-      await supabase.auth.signOut();
+      if (this.isConfigured) {
+        await supabase.auth.signOut();
+      }
       this.session = null;
       this.user = null;
       this.profile = null;
