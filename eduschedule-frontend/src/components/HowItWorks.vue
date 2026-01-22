@@ -1,41 +1,50 @@
+<script setup lang="ts">
+const steps = [
+  {
+    num: "01",
+    title: "Define Your Constraints",
+    desc: "Input your teachers, classes, rooms, and subjects. Tell us who is unavailable on Fridays or which classes need double periods.",
+    icon: "📝"
+  },
+  {
+    num: "02",
+    title: "AI Generation",
+    desc: "Our CP-SAT solver analyzes millions of possibilities in seconds, ensuring no room is double-booked and every teacher gets a break.",
+    icon: "🧠"
+  },
+  {
+    num: "03",
+    title: "Review & Publish",
+    desc: "Drag and drop to make final tweaks if needed (we'll warn you if you break a rule), then export to PDF or email to staff.",
+    icon: "🚀"
+  }
+];
+</script>
+
 <template>
-  <div class="bg-white py-24 sm:py-32">
-    <div class="mx-auto max-w-7xl px-6 lg:px-8">
-      <div class="mx-auto max-w-2xl lg:text-center">
-        <h2 class="text-base font-semibold leading-7 text-brand-secondary">Get Started in Minutes</h2>
-        <p class="mt-2 text-3xl font-bold tracking-tight text-brand-dark sm:text-4xl">Everything you need to create the perfect schedule</p>
+  <section id="how-it-works" class="py-24 bg-brand-bg relative overflow-hidden">
+    <div class="absolute left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-brand-secondary/20 to-transparent hidden md:block"></div>
+
+    <div class="max-w-7xl mx-auto px-6 relative z-10">
+      <div class="text-center mb-16">
+        <h2 class="text-3xl md:text-4xl font-bold font-heading text-brand-primary mb-4">How It Works</h2>
+        <p class="text-brand-secondary max-w-2xl mx-auto">Three simple steps to move from chaos to clarity.</p>
       </div>
-      <div class="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-4xl">
-        <dl class="grid max-w-xl grid-cols-1 gap-x-8 gap-y-10 lg:max-w-none lg:grid-cols-2 lg:gap-y-16">
-          <div class="relative pl-16">
-            <dt class="text-base font-semibold leading-7 text-brand-dark">
-              <div class="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-brand-primary">
-                <span class="text-white">1</span>
-              </div>
-              Register & Set Up
-            </dt>
-            <dd class="mt-2 text-base leading-7 text-brand-gray">Create your admin account and set up your school's profile. Add your teachers, rooms, and subjects in our intuitive dashboard.</dd>
+
+      <div class="space-y-12 md:space-y-0 md:grid md:grid-cols-3 md:gap-12">
+        <div v-for="(step, index) in steps" :key="index" class="relative group">
+          <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 relative z-10 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+            <div class="text-5xl font-bold text-brand-bg/50 absolute top-4 right-4">{{ step.num }}</div>
+            <div class="w-14 h-14 bg-brand-accent/10 rounded-xl flex items-center justify-center text-3xl mb-6 text-brand-accent">
+              {{ step.icon }}
+            </div>
+            <h3 class="text-xl font-bold text-brand-primary mb-3">{{ step.title }}</h3>
+            <p class="text-brand-secondary leading-relaxed text-sm">{{ step.desc }}</p>
           </div>
-          <div class="relative pl-16">
-            <dt class="text-base font-semibold leading-7 text-brand-dark">
-              <div class="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-brand-primary">
-                 <span class="text-white">2</span>
-              </div>
-              Generate & Refine
-            </dt>
-            <dd class="mt-2 text-base leading-7 text-brand-gray">Our AI engine generates multiple conflict-free timetable options. Use the drag-and-drop editor to make final adjustments.</dd>
-          </div>
-          <div class="relative pl-16">
-            <dt class="text-base font-semibold leading-7 text-brand-dark">
-              <div class="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-brand-primary">
-                 <span class="text-white">3</span>
-              </div>
-              Publish & Share
-            </dt>
-            <dd class="mt-2 text-base leading-7 text-brand-gray">Publish the final timetable. Teachers and students can view the live schedule from any device, anywhere.</dd>
-          </div>
-        </dl>
+
+          <div v-if="index !== steps.length - 1" class="absolute left-1/2 -bottom-12 w-px h-12 bg-slate-200 md:hidden"></div>
+        </div>
       </div>
     </div>
-  </div>
+  </section>
 </template>

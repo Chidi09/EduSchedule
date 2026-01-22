@@ -6,6 +6,7 @@ import os
 
 from core.dependencies import get_current_user, supabase
 from core.rbac import admin_required, teacher_or_admin_required, require_permission, validate_school_access, log_rbac_violation
+from core.permissions import check_plan_limits
 from schemas.data_models import TeacherBase, TeacherCreate
 
 router = APIRouter(
@@ -14,13 +15,19 @@ router = APIRouter(
 )
 
 @router.post("/", response_model=TeacherBase, status_code=status.HTTP_201_CREATED)
-def create_teacher(teacher: TeacherCreate, admin_user: dict = Depends(admin_required)):
+def create_teacher(
+    teacher: TeacherCreate,
+    admin_user: dict = Depends(admin_required),
+    _: dict = Depends(check_plan_limits("teachers"))
+):
     """
     Create a new teacher profile manually. Admin only.
+    Plan limits are enforced - free plan limited to 5 teachers, pro to 50, enterprise unlimited.
     """
     # Ensure teacher is created in admin's school
     teacher_data = teacher.dict()
     teacher_data['school_id'] = admin_user['school_id']
+    teacher_data['user_id'] = admin_user['id']
 
     response = supabase.table('teachers').insert(teacher_data).execute()
     if not response.data:

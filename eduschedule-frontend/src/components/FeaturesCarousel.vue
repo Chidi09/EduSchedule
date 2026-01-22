@@ -1,66 +1,43 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-
-const features = [
-  { 
-    title: 'AI-Powered Scheduling', 
-    description: 'Our intelligent engine generates balanced, conflict-free timetables in minutes, not hours.',
-    icon: '🧠' 
-  },
-  { 
-    title: 'Drag & Drop Editing', 
-    description: 'Easily make manual adjustments to your schedule with an intuitive interface and real-time conflict validation.',
-    icon: '🖐️'
-  },
-  { 
-    title: 'Teacher Preferences', 
-    description: 'Create happier staff by allowing our solver to consider teacher availability and preferences.',
-    icon: '❤️'
-  },
-];
-
-const currentFeatureIndex = ref(0);
-
-function nextFeature() {
-  currentFeatureIndex.value = (currentFeatureIndex.value + 1) % features.length;
-}
-function prevFeature() {
-  currentFeatureIndex.value = (currentFeatureIndex.value - 1 + features.length) % features.length;
-}
+// Modern SaaS "Bento Grid" style features
 </script>
 
 <template>
-  <div class="relative w-full max-w-2xl mx-auto text-center">
-    <div class="overflow-hidden relative h-48">
-      <Transition name="slide-fade">
-        <div :key="currentFeatureIndex" class="absolute w-full">
-          <p class="text-5xl">{{ features[currentFeatureIndex].icon }}</p>
-          <h3 class="text-2xl font-bold mt-4">{{ features[currentFeatureIndex].title }}</h3>
-          <p class="mt-2 text-brand-gray">{{ features[currentFeatureIndex].description }}</p>
+  <section class="py-24 bg-slate-50">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="text-center mb-16">
+        <h2 class="text-3xl md:text-4xl font-bold font-heading text-brand-primary mb-4">Powerful Features</h2>
+        <p class="text-brand-secondary">Everything you need to run a modern academic institution.</p>
+      </div>
+
+      <div class="grid md:grid-cols-4 md:grid-rows-2 gap-6 h-auto md:h-[600px]">
+        <div class="md:col-span-2 md:row-span-2 bg-brand-primary rounded-3xl p-8 md:p-12 relative overflow-hidden group text-white">
+          <div class="relative z-10">
+            <h3 class="text-2xl font-bold mb-4">Conflict-Free Guarantee</h3>
+            <p class="text-slate-300 leading-relaxed">Our core algorithm mathematically proves that no teacher or room is double booked. If a schedule exists, we will find it.</p>
+            <button class="mt-8 px-6 py-2 bg-white/10 backdrop-blur-sm rounded-full text-sm font-semibold hover:bg-white/20 transition">Learn about the Solver &rarr;</button>
+          </div>
+          <div class="absolute -bottom-10 -right-10 w-64 h-64 bg-brand-accent rounded-full blur-[80px] opacity-50 group-hover:opacity-70 transition duration-700"></div>
         </div>
-      </Transition>
+
+        <div class="md:col-span-2 bg-white rounded-3xl p-8 border border-slate-100 shadow-sm hover:shadow-md transition">
+          <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center text-2xl mb-4">📱</div>
+          <h3 class="text-xl font-bold text-brand-primary mb-2">Mobile First</h3>
+          <p class="text-brand-secondary text-sm">Teachers can check their upcoming classes on their phones. PWA support included.</p>
+        </div>
+
+        <div class="md:col-span-1 bg-white rounded-3xl p-8 border border-slate-100 shadow-sm hover:shadow-md transition">
+          <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center text-2xl mb-4">⚡</div>
+          <h3 class="text-lg font-bold text-brand-primary mb-2">Instant</h3>
+          <p class="text-brand-secondary text-sm">Generate full term schedules in under 60 seconds.</p>
+        </div>
+
+        <div class="md:col-span-1 bg-white rounded-3xl p-8 border border-slate-100 shadow-sm hover:shadow-md transition">
+          <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center text-2xl mb-4">📊</div>
+          <h3 class="text-lg font-bold text-brand-primary mb-2">Reports</h3>
+          <p class="text-brand-secondary text-sm">Export teacher workload and room utilization stats.</p>
+        </div>
+      </div>
     </div>
-
-    <button @click="prevFeature" class="absolute left-0 top-1/2 -translate-y-1/2 p-2 rounded-full bg-gray-200 hover:bg-gray-300">
-      &lt;
-    </button>
-    <button @click="nextFeature" class="absolute right-0 top-1/2 -translate-y-1/2 p-2 rounded-full bg-gray-200 hover:bg-gray-300">
-      &gt;
-    </button>
-  </div>
+  </section>
 </template>
-
-<style scoped>
-.slide-fade-enter-active,
-.slide-fade-leave-active {
-  transition: all 0.5s ease;
-}
-.slide-fade-enter-from {
-  opacity: 0;
-  transform: translateX(50px);
-}
-.slide-fade-leave-to {
-  opacity: 0;
-  transform: translateX(-50px);
-}
-</style>

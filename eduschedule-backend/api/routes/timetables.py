@@ -1,6 +1,8 @@
 import asyncio
 import logging
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 from core.dependencies import get_current_user, supabase
 from services.scheduler import TimetableScheduler
 from services.ai_orchestrator import extract_metrics, rank_candidates_with_gemini, explain_candidate_with_gpt
@@ -10,6 +12,9 @@ import concurrent.futures
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/timetables", tags=["Timetables"], dependencies=[Depends(get_current_user)])
+
+# Initialize rate limiter for this router
+limiter = Limiter(key_func=get_remote_address)
 
 # Create a thread pool for heavy calculations
 executor = concurrent.futures.ThreadPoolExecutor(max_workers=3)
@@ -23,7 +28,8 @@ def run_solver(teachers_data, rooms_data, subjects_data, classes_data, teacher_s
     return solutions
 
 @router.post("/generate", status_code=status.HTTP_202_ACCEPTED)
-async def generate_timetable():
+@limiter.limit("5/hour")
+async def generate_timetable(request: Request):
     # 1. Fetch data (IO bound, okay to await)
     teachers = supabase.table('teachers').select("*").execute().data
     rooms = supabase.table('rooms').select("*").execute().data
